@@ -121,5 +121,31 @@ abline(h = median(x1sub, na.rm = T))
 ## the spikes verified in 1992 are no longer occurring in 2012.
 
 ## Let's now look at state level ---
+## First check means of pm2.5 value by state
 
+mn0 <- with(pm0, tapply(Sample.Value, State.Code, mean, na.rm = T))
+str(mn0)
+summary(mn0)
 
+mn1 <- with(pm1, tapply(Sample.Value, State.Code, mean, na.rm = T))
+str(mn1)
+summary(mn1)
+
+# Create a data frame with state and mean of pm
+d0 <- data.frame(state = names(mn0), mean = mn0)
+d1 <- data.frame(state = names(mn1), mean = mn1)
+head(d0)
+head(d1)
+
+# Merge both datasets
+mrg <- merge(d0, d1, by = "state")
+dim(mrg)
+head(mrg)
+
+# Plot result
+par(mfrow = c(1,1))
+with(mrg, plot(rep(1999,52), mrg[,2], xlim = c(1998,2013)))
+with(mrg, points(rep(2012,52), mrg[,3]))
+
+# connect the states to help visualise the trend between the two years
+segments(rep(1999,52), mrg[,2], rep(2012,52), mrg[,3])
