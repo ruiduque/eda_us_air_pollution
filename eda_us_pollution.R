@@ -21,7 +21,7 @@ x0 <- pm0$Sample.Value
 str(x0)
 summary(x0) # 13217 NA values...
 
-# Find proportion of missing values
+# Exactly what percentage of values are missing in this vector?
 mean(is.na(x0)) #about 11% missing
 
 # Let's read the datafile for 2012
