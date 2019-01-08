@@ -32,7 +32,7 @@ scc_coal_levels <- subset(SCC, EI.Sector %in% scc_coal)[,c("SCC", "EI.Sector")]
 ### Filter the main dataset by desired SCC & summarise by year & EI.Sectors for plotting
 NEI_sum <- NEI %>%
         filter(SCC %in% scc_coal_levels$SCC) %>%
-        left_join(scc_coal_levels, by = "SCC") #%>%
+        left_join(scc_coal_levels, by = "SCC") %>%
         group_by(year, EI.Sector) %>%
         summarise(Emissions = sum(Emissions, na.rm = T))
 
