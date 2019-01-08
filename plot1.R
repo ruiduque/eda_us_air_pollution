@@ -5,7 +5,6 @@
 # Using the base plotting system, make a plot showing the total PM2.5 emission from all sources
 # for each of the years 1999, 2002, 2005, and 2008.
 
-
 files_for_analysis <- "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2FNEI_data.zip"
 
 if(!file.exists("./data")){
@@ -17,18 +16,29 @@ if(!file.exists("./data")){
 NEI <- readRDS("data/summarySCC_PM25.rds")
 
 # Calculate sum & mean of emissions by year
-year_mean <- with(NEI, tapply(Emissions, year, mean, na.rm = T))
-year_sum <- with(NEI, tapply(Emissions, year, sum, na.rm = T))
+#year_mean <- with(NEI, tapply(Emissions, year, mean, na.rm = T))
+#year_sum <- with(NEI, tapply(Emissions, year, sum, na.rm = T))
+
+year_sum <- aggregate(Emissions ~ year, data = NEI, sum)
+year_mean <- aggregate(Emissions ~ year, data = NEI, mean)
 
 # Plot graph showing total and mean emissions by year
 png(filename="plot1.png")
 par(mar = c(5,5,2,5))
-barplot(year_sum, names=names(year_sum),
-        main=expression(paste("US ",PM[2.5]," emissions by Year")),
-        ylab="Total Emissions in (Tons)", xlab="Calendar Year")
+barplot(year_sum$Emissions/10^6, 
+        names = factor(year_sum$year),
+        main = "PM2.5 Emissions by Year in the US",
+        xlab = "Calendar Year",
+        ylab = "Total Emissions in (10^6 Tons)",
+        col = "dodgerblue")
 par(new = T)
-plot(names(year_mean), year_mean, type = "b", col = "red3", pch=16, axes=F, xlab=NA, ylab=NA, cex=1.2)
+plot(year_mean$year,
+     year_mean$Emissions, 
+     type = "b",
+     col = "red3", pch=16, axes=F,
+     xlab=NA, ylab=NA,
+     cex=1.2)
 axis(side = 4)
 mtext(side = 4, line = 3, 'Mean emmissions in (Tons)')
-legend("topright", lty=c(1,1), col = c("grey","red"), legend = c("Total (bars)", "Mean (line)"))
+legend("topright", lty=c(1,1), col = c("grey","red"), legend = c("Total Emissions (bars)", "Mean Emissions (line)"))
 dev.off()

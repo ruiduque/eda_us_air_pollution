@@ -19,26 +19,23 @@ if(!file.exists("./data")){
 ## Read source files
 NEI <- readRDS("data/summarySCC_PM25.rds")
 
-# Retain only records for the city of Baltimore (fips == "24510") and columns - type, year & Emissions
+# Filter by city of Baltimore (fips == "24510") and generate summary by year and type for plotting
 NEI_sum <- NEI %>%
         filter(fips == "24510") %>%
         group_by(year, type) %>%
         summarise(Emissions = sum(Emissions))
 
-# Create graph of sums and means for each type or source
+# Plot resulting dataset
 png(filename="plot3.png")
 ggplot(NEI_sum, aes(factor(year), Emissions)) + 
-#        geom_line(aes(group = type), colour = "grey80") +
         geom_bar(stat = "identity", fill = "dodgerblue") +
-#        geom_point(aes(colour = type)) +
-        geom_smooth(aes(colour = type)) +
         facet_grid(.~type) +
-        labs(title = "Baltimore emissions by year and source") +
+        labs(title = "Baltimore pm2.5 emissions by year and source") +
+        theme(plot.title = element_text(face = "bold", size = 16)) +
         labs(x = "Calendar Year") +
+        labs(y = "Emissions in (Tons)") +
         labs(caption = "Source: EPA National Emissions Inventory web site") +
-        theme_economist_white()
-#       scale_y_continuous(minor_breaks = seq(0,max(NEI_sum$Emissions), by = 100))
-#        scale_x_continuous(breaks = c(1999,2002,2005,2008))
+        scale_y_continuous(minor_breaks = seq(0,max(NEI_sum$Emissions), by = 100)) 
 dev.off()
 
 

@@ -20,22 +20,32 @@ NEI <- readRDS("data/summarySCC_PM25.rds")
 SCC <- readRDS("data/Source_Classification_Code.rds")
 
 ## Determine EI Sectors that refer to coal and related sub-levels of the SCC hierarchy
+## Assuming SCC is constructed as a multi-level hierararchy of nodes where the top node
+## has a direct relation with the underlying nodes.
+## The three EI.Sector's of interest are:
+## 1. "Fuel Comb - Electric Generation - Coal" 
+## 2. "Fuel Comb - Industrial Boilers, ICEs - Coal"
+## 3. "Fuel Comb - Comm/Institutional - Coal" 
 scc_coal <- unique(grep("coal", SCC$EI.Sector, ignore.case = T, value = T))
-scc_coal_levels <- subset(SCC, EI.Sector %in% scc_coal)
+scc_coal_levels <- subset(SCC, EI.Sector %in% scc_coal)[,c("SCC", "EI.Sector")]
 
-### Filter the main dataset by desired SCC & summarise by year for plotting
+### Filter the main dataset by desired SCC & summarise by year & EI.Sectors for plotting
 NEI_sum <- NEI %>%
         filter(SCC %in% scc_coal_levels$SCC) %>%
-        group_by(year) %>%
+        left_join(scc_coal_levels, by = "SCC") #%>%
+        group_by(year, EI.Sector) %>%
         summarise(Emissions = sum(Emissions, na.rm = T))
 
 ## Plot resulting dataset
 png(filename="plot4.png")
-ggplot(NEI_sum, aes(factor(year), Emissions)) + 
+ggplot(NEI_sum, aes(factor(year), Emissions/10^05)) + 
         geom_bar(stat = "identity", fill = "dodgerblue") +
-        labs(title = "** US coal combustion-related emissions by Year **") +
+        facet_grid(.~EI.Sector) +
+        labs(title = "Coal combustion-related emissions by Year in the US") +
+        theme(plot.title = element_text(face = "bold", size = 16)) +
+        labs(subtitle = "Showing source sectors for completeness") +
+        theme(plot.subtitle = element_text(face = "italic", size = 12)) +
+        labs(x = "Calendar Year", y = "Total Emissions in (10^05 Tons)") +
         labs(caption = "Source: EPA National Emissions Inventory web site") +
-        labs(x = "Calendar Year", y = "Total Emissions") +
-        theme_stata()
-
+        scale_y_continuous(minor_breaks = seq(0,max(NEI_sum$Emissions/10^05), by = 1))
 dev.off()

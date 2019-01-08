@@ -19,17 +19,26 @@ NEI <- readRDS("data/summarySCC_PM25.rds")
 NEI <- subset(NEI, fips == "24510")
 
 # Calculate sum & mean of emissions by year
-year_mean <- with(NEI, tapply(Emissions, year, mean, na.rm = T))
-year_sum <- with(NEI, tapply(Emissions, year, sum, na.rm = T))
+year_mean <- aggregate(Emissions ~ year, data = NEI, mean)
+year_sum <- aggregate(Emissions ~ year, data = NEI, sum)
 
 # Plot graph showing total and mean emissions by year
 png(filename="plot2.png")
 par(mar = c(5,5,2,5))
-barplot(year_sum, names=names(year_sum),
-        main=expression(paste(PM[2.5]," emissions by Year in the city of Baltimore")),
-        ylab="Total Emissions in (Tons)", xlab="Calendar Year")
+barplot(year_sum$Emissions,
+        names = factor(year_sum$year),
+        main = "PM2.5 Emissions by Year in the City of Baltimore",
+        xlab = "Calendar Year",
+        ylab="Total Emissions in (Tons)",
+        col = "dodgerblue")
 par(new = T)
-plot(names(year_mean), year_mean, type = "b", col = "red3", pch=16, axes=F, xlab=NA, ylab=NA, cex=1.2)
+plot(year_mean$year,
+     year_mean$Emissions,
+     type = "b",
+     col = "red3", pch=16,
+     axes=F,
+     xlab=NA, ylab=NA,
+     cex=1.2)
 axis(side = 4)
 mtext(side = 4, line = 3, 'Mean emmissions in (Tons)')
 legend("topright", lty=c(1,1), col = c("grey","red"), legend = c("Total (bars)", "Mean (line)"))
